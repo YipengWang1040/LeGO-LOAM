@@ -33,6 +33,10 @@
 //      IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). October 2018.
 
 #include "utility.h"
+#include <chrono>
+#include <fstream>
+
+std::ofstream out("/home/arcs/cw_lego_loam/time_scan.txt");
 
 class ImageProjection{
 private:
@@ -180,6 +184,7 @@ public:
     
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
 
+        std::chrono::steady_clock::time_point tic = std::chrono::steady_clock::now();
         // 1. Convert ros message to pcl point cloud
         copyPointCloud(laserCloudMsg);
         // 2. Start and end angle of a scan
@@ -194,6 +199,9 @@ public:
         publishCloud();
         // 7. Reset parameters for next iteration
         resetParameters();
+        std::chrono::steady_clock::time_point toc = std::chrono::steady_clock::now();
+        double frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic).count() / 1000000.0;
+        out << frame_time << ',' << std::endl;
     }
 
     void findStartEndAngle(){
